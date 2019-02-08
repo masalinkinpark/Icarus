@@ -4,24 +4,38 @@ using System.Collections.ObjectModel;
 
 namespace Icarus.Core
 {
+    public class LocalizedModel
+    {
+        private readonly ReadOnlyDictionary<string, string> _localizedText;
+
+        public LocalizedModel(ReadOnlyDictionary<string, string> localizedText)
+        {
+            _localizedText = localizedText;
+        }
+
+        public string GetText(string key)
+        {
+            return TextLocalizer.GetText(_localizedText, key);
+        }
+
+        public string GetText(string key, params object[] args)
+        {
+            return TextLocalizer.GetText(_localizedText, key, args);
+        }
+    }
+
     public static partial class TextLocalizer
     {
-        private static ReadOnlyDictionary<string, string> _localizedText;
-
-        public static void Initialize(string defaultLanguage, string targetLanguage)
+        public static LocalizedModel Create(string defaultLanguage, string targetLanguage, string targetRawText)
         {
-            _localizedText = GetLocalizedText(defaultLanguage, targetLanguage, FileLoader.LoadDefaultFile().text);
+            var dic = TextLocalizer.GetLocalizedText(defaultLanguage, targetLanguage, targetRawText);
+            return new LocalizedModel(dic);
         }
 
-        public static void Initialize(string defaultLanguage, string targetLanguage, string targetRawText)
-        {
-            _localizedText = GetLocalizedText(defaultLanguage, targetLanguage, targetRawText);
-        }
-
-        public static string GetText(string key)
+        public static string GetText(ReadOnlyDictionary<string, string> localizedText, string key)
         {
             string text;
-            _localizedText.TryGetValue(key, out text);
+            localizedText.TryGetValue(key, out text);
             if (text == null)
             {
                 throw new KeyNotFoundException($"Key Not Found : {key}");
@@ -29,12 +43,12 @@ namespace Icarus.Core
             return text;
         }
 
-        public static string GetText(string key, params object[] args)
+        public static string GetText(ReadOnlyDictionary<string, string> localizedText, string key, params object[] args)
         {
             string value = string.Empty;
             try
             {
-                value = string.Format(_localizedText[key], args);
+                value = string.Format(localizedText[key], args);
             }
             catch (FormatException)
             {
@@ -46,7 +60,7 @@ namespace Icarus.Core
                 }
 
                 var substring = debugOutput.Substring(0, debugOutput.Length - 1);
-                throw new FormatException($"Body の可変長引数に対して、param の可変長引数が足りない Key : {key} , Body : {_localizedText[key]} , params : {substring}");
+                throw new FormatException($"Body の可変長引数に対して、param の可変長引数が足りない Key : {key} , Body : {localizedText[key]} , params : {substring}");
             }
 
             return value;
