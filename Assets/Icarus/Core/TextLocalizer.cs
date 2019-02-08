@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using UnityEngine;
 
 namespace Icarus.Core
 {
@@ -26,7 +27,49 @@ namespace Icarus.Core
 
     public static partial class TextLocalizer
     {
-        public static LocalizedModel Create(string defaultLanguage, string targetLanguage, string targetRawText)
+        private static Dictionary<int, LocalizedModel> _localizeSet = new Dictionary<int, LocalizedModel>();
+
+        public static void Clear()
+        {
+            _localizeSet = new Dictionary<int, LocalizedModel>();
+        }
+
+        public static void Set(int localizedFileKey, string defaultLanguage, string targetLanguage, string targetRawText)
+        {
+            if (_localizeSet.ContainsKey(localizedFileKey))
+            {
+                Debug.Log($"Key ({localizedFileKey}) duplicated. Update Localize Text.");
+                return;
+            }
+
+            var dic = TextLocalizer.GetLocalizedText(defaultLanguage, targetLanguage, targetRawText);
+            _localizeSet.Add(localizedFileKey, new LocalizedModel(dic));
+        }
+
+        public static void Update(int localizedFileKey, string defaultLanguage, string targetLanguage, string targetRawText)
+        {
+            if (!_localizeSet.ContainsKey(localizedFileKey))
+            {
+                Debug.LogWarning($"Key ({localizedFileKey}) not Found.");
+                return;
+            }
+
+            _localizeSet.Remove(localizedFileKey);
+            var dic = TextLocalizer.GetLocalizedText(defaultLanguage, targetLanguage, targetRawText);
+            _localizeSet.Add(localizedFileKey, new LocalizedModel(dic));
+        }
+
+        public static string GetText(int localizedFileKey, string key)
+        {
+            return _localizeSet[localizedFileKey].GetText(key);
+        }
+
+        public static string GetText(int localizedFileKey, string key, params object[] args)
+        {
+            return _localizeSet[localizedFileKey].GetText(key, args);
+        }
+
+        public static LocalizedModel CreateLocalizedModel(string defaultLanguage, string targetLanguage, string targetRawText)
         {
             var dic = TextLocalizer.GetLocalizedText(defaultLanguage, targetLanguage, targetRawText);
             return new LocalizedModel(dic);

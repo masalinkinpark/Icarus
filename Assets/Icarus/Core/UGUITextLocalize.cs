@@ -11,7 +11,7 @@ namespace Icarus.Core
         private void Start()
         {
             var textComponent = this.GetComponent<Text>();
-            textComponent.text = TextLocalizer.GetText(_key);
+            // textComponent.text = TextLocalizer.GetText(_key);
         }
     }
 }

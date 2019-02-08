@@ -12,6 +12,14 @@ namespace Icarus.Editor.Test
     public class IcarusLocalizerTest
     {
         [Test]
+        public void Test()
+        {
+            var localize = TextLocalizer.CreateLocalizedModel("ja", "en", $"key,ja,en{Environment.NewLine}KeyTest,テスト{Environment.NewLine}KeyTest2,テスト2,Test2{Environment.NewLine}KeyTest3,テスト3,Test3");
+            Assert.AreEqual(localize.GetText("KeyTest"), "テスト");
+        }
+
+        /*
+        [Test]
         public void ConvertTextToDic()
         {
             TextLocalizer.Initialize("ja", "ja", $"key,ja,en{Environment.NewLine}KeyTest,テスト,Test{Environment.NewLine}");
@@ -244,5 +252,6 @@ Sum,座標{0},Pos {0}"
             }
             AssetDatabase.Refresh();
         }
+        */
     }
 }
