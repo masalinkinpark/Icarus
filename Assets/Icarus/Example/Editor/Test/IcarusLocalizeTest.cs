@@ -14,7 +14,7 @@ namespace Icarus.Editor.Test
         [Test]
         public void Test()
         {
-            var localize = TextLocalizer.CreateLocalizedModel("ja", "en", $"key,ja,en{Environment.NewLine}KeyTest,テスト{Environment.NewLine}KeyTest2,テスト2,Test2{Environment.NewLine}KeyTest3,テスト3,Test3");
+            var localize = Localize.CreateLocalizationModel("ja", "en", $"key,ja,en{Environment.NewLine}KeyTest,テスト{Environment.NewLine}KeyTest2,テスト2,Test2{Environment.NewLine}KeyTest3,テスト3,Test3");
             Assert.AreEqual(localize.GetText("KeyTest"), "テスト");
         }
 

@@ -5,93 +5,25 @@ using UnityEngine;
 
 namespace Icarus.Core
 {
-    public class LocalizedModel
+    public static class TextLocalizer
     {
-        private readonly ReadOnlyDictionary<string, string> _localizedText;
-
-        public LocalizedModel(ReadOnlyDictionary<string, string> localizedText)
-        {
-            _localizedText = localizedText;
-        }
-
-        public string GetText(string key)
-        {
-            return TextLocalizer.GetText(_localizedText, key);
-        }
-
-        public string GetText(string key, params object[] args)
-        {
-            return TextLocalizer.GetText(_localizedText, key, args);
-        }
-    }
-
-    public static partial class TextLocalizer
-    {
-        private static Dictionary<int, LocalizedModel> _localizeSet = new Dictionary<int, LocalizedModel>();
-
-        public static void Clear()
-        {
-            _localizeSet = new Dictionary<int, LocalizedModel>();
-        }
-
-        public static void Set(int localizedFileKey, string defaultLanguage, string targetLanguage, string targetRawText)
-        {
-            if (_localizeSet.ContainsKey(localizedFileKey))
-            {
-                Debug.Log($"Key ({localizedFileKey}) duplicated. Update Localize Text.");
-                return;
-            }
-
-            var dic = TextLocalizer.GetLocalizedText(defaultLanguage, targetLanguage, targetRawText);
-            _localizeSet.Add(localizedFileKey, new LocalizedModel(dic));
-        }
-
-        public static void Update(int localizedFileKey, string defaultLanguage, string targetLanguage, string targetRawText)
-        {
-            if (!_localizeSet.ContainsKey(localizedFileKey))
-            {
-                Debug.LogWarning($"Key ({localizedFileKey}) not Found.");
-                return;
-            }
-
-            _localizeSet.Remove(localizedFileKey);
-            var dic = TextLocalizer.GetLocalizedText(defaultLanguage, targetLanguage, targetRawText);
-            _localizeSet.Add(localizedFileKey, new LocalizedModel(dic));
-        }
-
-        public static string GetText(int localizedFileKey, string key)
-        {
-            return _localizeSet[localizedFileKey].GetText(key);
-        }
-
-        public static string GetText(int localizedFileKey, string key, params object[] args)
-        {
-            return _localizeSet[localizedFileKey].GetText(key, args);
-        }
-
-        public static LocalizedModel CreateLocalizedModel(string defaultLanguage, string targetLanguage, string targetRawText)
-        {
-            var dic = TextLocalizer.GetLocalizedText(defaultLanguage, targetLanguage, targetRawText);
-            return new LocalizedModel(dic);
-        }
-
-        public static string GetText(ReadOnlyDictionary<string, string> localizedText, string key)
+        public static string GetText(ReadOnlyDictionary<string, string> localizedDictionary, string localizeKey)
         {
             string text;
-            localizedText.TryGetValue(key, out text);
+            localizedDictionary.TryGetValue(localizeKey, out text);
             if (text == null)
             {
-                throw new KeyNotFoundException($"Key Not Found : {key}");
+                throw new KeyNotFoundException($"Key Not Found : {localizeKey}");
             }
             return text;
         }
 
-        public static string GetText(ReadOnlyDictionary<string, string> localizedText, string key, params object[] args)
+        public static string GetText(ReadOnlyDictionary<string, string> localizedDictionary, string localizeKey, params object[] args)
         {
             string value = string.Empty;
             try
             {
-                value = string.Format(localizedText[key], args);
+                value = string.Format(localizedDictionary[localizeKey], args);
             }
             catch (FormatException)
             {
@@ -103,16 +35,16 @@ namespace Icarus.Core
                 }
 
                 var substring = debugOutput.Substring(0, debugOutput.Length - 1);
-                throw new FormatException($"Body の可変長引数に対して、param の可変長引数が足りない Key : {key} , Body : {localizedText[key]} , params : {substring}");
+                throw new FormatException($"Body の可変長引数に対して、param の可変長引数が足りない Key : {localizeKey} , Body : {localizedDictionary[localizeKey]} , params : {substring}");
             }
 
             return value;
         }
 
-        private static ReadOnlyDictionary<string, string> GetLocalizedText(string defaultLanguage, string targetLanguage, string text)
+        internal static ReadOnlyDictionary<string, string> GetLocalizedTextDictionary(string defaultLanguage, string targetLanguage, string rawText)
         {
             var dic = new Dictionary<string, string>();
-            var keyValueLine = text.Split(new[] { "\n", "\r", "\r\n" }, StringSplitOptions.None);
+            var keyValueLine = rawText.Split(new[] { "\n", "\r", "\r\n" }, StringSplitOptions.None);
             var langAttribute = keyValueLine[0].Split(',');
             int defaultLanguageIndex = 0;
             int targetLanguageIndex = 0;
